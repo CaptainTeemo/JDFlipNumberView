@@ -12,6 +12,11 @@
 @property (nonatomic, strong) NSDate *targetDate;
 @property (nonatomic, assign) NSUInteger zDistance;
 
+@property (nonatomic, strong) NSAttributedString *dayDesc;
+@property (nonatomic, strong) NSAttributedString *hourDesc;
+@property (nonatomic, strong) NSAttributedString *minuteDesc;
+@property (nonatomic, strong) NSAttributedString *secondDesc;
+
 - (id)initWithDayDigitCount:(NSInteger)dayDigits;
 - (id)initWithDayDigitCount:(NSInteger)dayDigits
             imageBundleName:(NSString*)imageBundleName;
