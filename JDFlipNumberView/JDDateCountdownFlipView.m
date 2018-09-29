@@ -198,27 +198,30 @@ static CGFloat kFlipAnimationUpdateInterval = 0.5; // = 2 times per second
     [self updateValuesAnimated:YES];
 }
 
-- (void)updateValuesAnimated:(BOOL)animated;
-{
-    if (self.targetDate == nil) {
-        return;
-    }
-    
-    if ([self.targetDate timeIntervalSinceDate:[NSDate date]] > 0) {
-        NSUInteger flags = NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond;
-        NSDateComponents* dateComponents = [[NSCalendar currentCalendar] components:flags fromDate:[NSDate date] toDate:self.targetDate options:0];
-        
-        [self.dayFlipNumberView setValue:[dateComponents day] animated:animated];
-        [self.hourFlipNumberView setValue:[dateComponents hour] animated:animated];
-        [self.minuteFlipNumberView setValue:[dateComponents minute] animated:animated];
-        [self.secondFlipNumberView setValue:[dateComponents second] animated:animated];
-    } else {
-        [self.dayFlipNumberView setValue:0 animated:animated];
-        [self.hourFlipNumberView setValue:0 animated:animated];
-        [self.minuteFlipNumberView setValue:0 animated:animated];
-        [self.secondFlipNumberView setValue:0 animated:animated];
-        [self stop];
-    }
+- (void)updateValuesAnimated:(BOOL)animated {
+	[self updateValuesWithDate:[NSDate date] animated:animated];
+}
+
+- (void)updateValuesWithDate:(NSDate *)date animated:(BOOL)animated {
+	if (self.targetDate == nil) {
+		return;
+	}
+	
+	if ([self.targetDate timeIntervalSinceDate:date] > 0) {
+		NSUInteger flags = NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond;
+		NSDateComponents* dateComponents = [[NSCalendar currentCalendar] components:flags fromDate:date toDate:self.targetDate options:0];
+		
+		[self.dayFlipNumberView setValue:[dateComponents day] animated:animated];
+		[self.hourFlipNumberView setValue:[dateComponents hour] animated:animated];
+		[self.minuteFlipNumberView setValue:[dateComponents minute] animated:animated];
+		[self.secondFlipNumberView setValue:[dateComponents second] animated:animated];
+	} else {
+		[self.dayFlipNumberView setValue:0 animated:animated];
+		[self.hourFlipNumberView setValue:0 animated:animated];
+		[self.minuteFlipNumberView setValue:0 animated:animated];
+		[self.secondFlipNumberView setValue:0 animated:animated];
+		[self stop];
+	}
 }
 
 @end
