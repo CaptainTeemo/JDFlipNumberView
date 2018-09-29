@@ -19,5 +19,6 @@
 - (void)stop;
 
 - (void)updateValuesAnimated:(BOOL)animated;
+- (void)updateValuesWithDate:(NSDate *)date animated:(BOOL)animated;
 
 @end
