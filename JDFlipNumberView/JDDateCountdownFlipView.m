@@ -103,6 +103,11 @@ static CGFloat kFlipAnimationUpdateInterval = 0.5; // = 2 times per second
     }
 }
 
+- (void)setStartDate:(NSDate *)startDate {
+    _startDate = startDate;
+    [self updateValuesAnimated:NO];
+}
+
 - (void)setTargetDate:(NSDate *)targetDate;
 {
     _targetDate = targetDate;
@@ -199,7 +204,8 @@ static CGFloat kFlipAnimationUpdateInterval = 0.5; // = 2 times per second
 }
 
 - (void)updateValuesAnimated:(BOOL)animated {
-	[self updateValuesWithDate:[NSDate date] animated:animated];
+	NSDate *startDate = self.startDate ?: [NSDate date];
+	[self updateValuesWithDate:startDate animated:animated];
 }
 
 - (void)updateValuesWithDate:(NSDate *)date animated:(BOOL)animated {
