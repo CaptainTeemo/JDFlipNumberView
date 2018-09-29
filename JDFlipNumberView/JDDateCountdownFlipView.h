@@ -8,6 +8,7 @@
 
 @interface JDDateCountdownFlipView : UIView
 
+@property (nonatomic, strong) NSDate *startDate;
 @property (nonatomic, strong) NSDate *targetDate;
 @property (nonatomic, assign) NSUInteger zDistance;
 
