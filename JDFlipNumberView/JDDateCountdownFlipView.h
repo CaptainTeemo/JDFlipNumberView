@@ -6,7 +6,14 @@
 //
 
 
+@protocol JSDateCountdownFlipViewDelegate <NSObject>
+@optional
+- (void)timerDidStop;
+@end
+
 @interface JDDateCountdownFlipView : UIView
+
+@property (nonatomic, weak) id<JSDateCountdownFlipViewDelegate> delegate;
 
 @property (nonatomic, strong) NSDate *startDate;
 @property (nonatomic, strong) NSDate *targetDate;
@@ -16,6 +23,8 @@
 @property (nonatomic, strong) NSAttributedString *hourDesc;
 @property (nonatomic, strong) NSAttributedString *minuteDesc;
 @property (nonatomic, strong) NSAttributedString *secondDesc;
+
+@property (nonatomic, assign) BOOL timerRunning;
 
 - (id)initWithDayDigitCount:(NSInteger)dayDigits;
 - (id)initWithDayDigitCount:(NSInteger)dayDigits
