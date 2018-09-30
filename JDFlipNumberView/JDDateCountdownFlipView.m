@@ -14,10 +14,20 @@ static CGFloat kFlipAnimationUpdateInterval = 0.5; // = 2 times per second
 @interface JDDateCountdownFlipView ()
 @property (nonatomic) NSInteger dayDigitCount;
 @property (nonatomic, copy) NSString *imageBundleName;
+
 @property (nonatomic, strong) JDFlipNumberView* dayFlipNumberView;
 @property (nonatomic, strong) JDFlipNumberView* hourFlipNumberView;
 @property (nonatomic, strong) JDFlipNumberView* minuteFlipNumberView;
 @property (nonatomic, strong) JDFlipNumberView* secondFlipNumberView;
+
+@property (nonatomic, strong) UIImageView *daySeparator;
+@property (nonatomic, strong) UIImageView *hourSeparator;
+@property (nonatomic, strong) UIImageView *minuteSeparator;
+
+@property (nonatomic, strong) UILabel *dayDescLabel;
+@property (nonatomic, strong) UILabel *hourDescLabel;
+@property (nonatomic, strong) UILabel *minuteDescLabel;
+@property (nonatomic, strong) UILabel *secondDescLabel;
 
 @property (nonatomic, strong) NSTimer *animationTimer;
 @end
@@ -59,6 +69,10 @@ static CGFloat kFlipAnimationUpdateInterval = 0.5; // = 2 times per second
         self.hourFlipNumberView = [[JDFlipNumberView alloc] initWithDigitCount:2 imageBundleName:imageBundleName];
         self.minuteFlipNumberView = [[JDFlipNumberView alloc] initWithDigitCount:2 imageBundleName:imageBundleName];
         self.secondFlipNumberView = [[JDFlipNumberView alloc] initWithDigitCount:2 imageBundleName:imageBundleName];
+		
+		self.daySeparator = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"JDFlipNumberView.bundle/flip_separator.png"]];
+		self.hourSeparator = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"JDFlipNumberView.bundle/flip_separator.png"]];
+		self.minuteSeparator = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"JDFlipNumberView.bundle/flip_separator.png"]];
         
         // set maximum values
         self.hourFlipNumberView.maximumValue = 23;
@@ -78,9 +92,28 @@ static CGFloat kFlipAnimationUpdateInterval = 0.5; // = 2 times per second
         self.frame = CGRectMake(0, 0, frame.size.width*(dayDigits+7), frame.size.height);
         
         // add subviews
-        for (JDFlipNumberView* view in @[self.dayFlipNumberView, self.hourFlipNumberView, self.minuteFlipNumberView, self.secondFlipNumberView]) {
+        for (UIView* view in @[self.dayFlipNumberView, self.daySeparator, self.hourFlipNumberView, self.hourSeparator, self.minuteFlipNumberView, self.minuteSeparator, self.secondFlipNumberView]) {
+			if ([view isKindOfClass:[UIImageView class]]) {
+				view.contentMode = UIViewContentModeScaleAspectFit;
+			}
             [self addSubview:view];
         }
+		
+		self.dayDescLabel = [UILabel new];
+		self.dayDescLabel.textAlignment = NSTextAlignmentCenter;
+		
+		self.hourDescLabel = [UILabel new];
+		self.hourDescLabel.textAlignment = NSTextAlignmentCenter;
+
+		self.minuteDescLabel = [UILabel new];
+		self.minuteDescLabel.textAlignment = NSTextAlignmentCenter;
+
+		self.secondDescLabel = [UILabel new];
+		self.secondDescLabel.textAlignment = NSTextAlignmentCenter;
+		
+		for (UILabel *label in @[self.dayDescLabel, self.hourDescLabel, self.minuteDescLabel, self.secondDescLabel]) {
+			[self addSubview:label];
+		}
         
         // set initial dates
         self.targetDate = [NSDate date];
@@ -103,15 +136,31 @@ static CGFloat kFlipAnimationUpdateInterval = 0.5; // = 2 times per second
     }
 }
 
-- (void)setStartDate:(NSDate *)startDate {
-    _startDate = startDate;
-    [self updateValuesAnimated:NO];
+//- (void)setStartDate:(NSDate *)startDate {
+//    _startDate = startDate;
+//    [self updateValuesAnimated:NO];
+//}
+//
+//- (void)setTargetDate:(NSDate *)targetDate;
+//{
+//    _targetDate = targetDate;
+//    [self updateValuesAnimated:NO];
+//}
+
+- (void)setDayDesc:(NSAttributedString *)dayDesc {
+	self.dayDescLabel.attributedText = dayDesc;
 }
 
-- (void)setTargetDate:(NSDate *)targetDate;
-{
-    _targetDate = targetDate;
-    [self updateValuesAnimated:NO];
+- (void)setHourDesc:(NSAttributedString *)hourDesc {
+	self.hourDescLabel.attributedText = hourDesc;
+}
+
+- (void)setMinuteDesc:(NSAttributedString *)minuteDesc {
+	self.minuteDescLabel.attributedText = minuteDesc;
+}
+
+- (void)setSecondDesc:(NSAttributedString *)secondDesc {
+	self.secondDescLabel.attributedText = secondDesc;
 }
 
 #pragma mark layout
@@ -123,26 +172,32 @@ static CGFloat kFlipAnimationUpdateInterval = 0.5; // = 2 times per second
     }
     
     CGFloat digitWidth = size.width/(self.dayFlipNumberView.digitCount+7);
-    CGFloat margin     = digitWidth/4.0;
+//    CGFloat margin     = digitWidth/4.0;
+	CGFloat margin     = 0;
     CGFloat currentX   = 0;
     
     // check first number size
     CGSize firstSize = CGSizeMake(digitWidth * self.dayDigitCount, size.height);
     firstSize = [self.dayFlipNumberView sizeThatFits:firstSize];
-    currentX += firstSize.width;
-    
+//    currentX += firstSize.width;
+	currentX += digitWidth * self.dayDigitCount;
+	
     // check other numbers
     CGSize nextSize;
-    for (JDFlipNumberView* view in @[self.hourFlipNumberView, self.minuteFlipNumberView, self.secondFlipNumberView]) {
+    for (UIView* view in @[self.dayFlipNumberView, self.daySeparator, self.hourFlipNumberView, self.hourSeparator, self.minuteFlipNumberView, self.minuteSeparator, self.secondFlipNumberView]) {
+		CGFloat width = digitWidth * 2;
+		if ([view isKindOfClass:[UIImageView class]]) {
+			width = 4;
+		}
         currentX += margin;
-        nextSize = CGSizeMake(digitWidth*2, size.height);
+        nextSize = CGSizeMake(width, size.height);
         nextSize = [view sizeThatFits:nextSize];
         currentX += nextSize.width;
     }
     
     // use bottom right of last number
     size.width  = ceil(currentX);
-    size.height = ceil(nextSize.height);
+    size.height = ceil(nextSize.height + 30);
     
     return size;
 }
@@ -155,41 +210,63 @@ static CGFloat kFlipAnimationUpdateInterval = 0.5; // = 2 times per second
         return;
     }
     
-    CGSize size = [self sizeThatFits:self.bounds.size];
-    CGFloat digitWidth = size.width/(self.dayFlipNumberView.digitCount+7);
-    CGFloat margin     = digitWidth/4.0;
+//    CGSize size = [self sizeThatFits:self.bounds.size];
+	CGSize size = self.bounds.size;
+
+
+//    CGFloat margin     = digitWidth/4.0;
+	CGFloat margin     = 5;
+	
+		//    CGFloat digitWidth = size.width/(self.dayFlipNumberView.digitCount+7);
+	CGFloat digitWidth = (size.width - margin * 7 - 12) / 8;
+	
     CGFloat currentX = round((self.bounds.size.width - size.width)/2.0);
-    
+//	CGFloat currentX = 0;
+	
     // resize first flipview
     self.dayFlipNumberView.frame = CGRectMake(currentX, 0, digitWidth * self.dayDigitCount, size.height);
-    currentX += self.dayFlipNumberView.frame.size.width;
-    
+//    currentX += self.dayFlipNumberView.frame.size.width;
+	
     // update flipview frames
-    for (JDFlipNumberView* view in @[self.hourFlipNumberView, self.minuteFlipNumberView, self.secondFlipNumberView]) {
+    for (UIView* view in @[self.dayFlipNumberView, self.daySeparator, self.hourFlipNumberView, self.hourSeparator, self.minuteFlipNumberView, self.minuteSeparator, self.secondFlipNumberView]) {
+		CGFloat width = digitWidth * 2;
+		if ([view isKindOfClass:[UIImageView class]]) {
+			width = 4;
+		}
         currentX   += margin;
-        view.frame = CGRectMake(currentX, 0, digitWidth*2, size.height);
+        view.frame = CGRectMake(currentX, 10, width, size.height);
         currentX   += view.frame.size.width;
     }
+	
+	self.dayDescLabel.frame = CGRectMake(0, 0, digitWidth * 2, 20);
+	self.dayDescLabel.center = CGPointMake(self.dayFlipNumberView.center.x, self.dayDescLabel.center.y);
+	
+	self.hourDescLabel.frame = CGRectMake(0, 0, digitWidth * 2, 20);
+	self.hourDescLabel.center = CGPointMake(self.hourFlipNumberView.center.x, self.hourDescLabel.center.y);
+	
+	self.minuteDescLabel.frame = CGRectMake(0, 0, digitWidth * 2, 20);
+	self.minuteDescLabel.center = CGPointMake(self.minuteFlipNumberView.center.x, self.minuteDescLabel.center.y);
+	
+	self.secondDescLabel.frame = CGRectMake(0, 0, digitWidth * 2, 20);
+	self.secondDescLabel.center = CGPointMake(self.secondFlipNumberView.center.x, self.secondDescLabel.center.y);
 }
 
 #pragma mark update timer
 
-
-- (void)start;
-{
-    if (self.animationTimer == nil) {
-        [self setupUpdateTimer];
-    }
+- (void)start {
+	if (self.animationTimer == nil) {
+		[self setupUpdateTimer];
+		self.timerRunning = YES;
+	}
 }
 
-- (void)stop;
-{
+- (void)stop {
     [self.animationTimer invalidate];
     self.animationTimer = nil;
+	self.timerRunning = NO;
 }
 
-- (void)setupUpdateTimer;
-{
+- (void)setupUpdateTimer {
     self.animationTimer = [NSTimer timerWithTimeInterval:kFlipAnimationUpdateInterval
                                                   target:self
                                                 selector:@selector(handleTimer:)
@@ -198,8 +275,7 @@ static CGFloat kFlipAnimationUpdateInterval = 0.5; // = 2 times per second
     [[NSRunLoop currentRunLoop] addTimer:self.animationTimer forMode:NSRunLoopCommonModes];
 }
 
-- (void)handleTimer:(NSTimer*)timer;
-{
+- (void)handleTimer:(NSTimer*)timer {
     [self updateValuesAnimated:YES];
 }
 
@@ -212,7 +288,6 @@ static CGFloat kFlipAnimationUpdateInterval = 0.5; // = 2 times per second
 	if (self.targetDate == nil) {
 		return;
 	}
-	
 	if ([self.targetDate timeIntervalSinceDate:date] > 0) {
 		NSUInteger flags = NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond;
 		NSDateComponents* dateComponents = [[NSCalendar currentCalendar] components:flags fromDate:date toDate:self.targetDate options:0];
@@ -221,12 +296,18 @@ static CGFloat kFlipAnimationUpdateInterval = 0.5; // = 2 times per second
 		[self.hourFlipNumberView setValue:[dateComponents hour] animated:animated];
 		[self.minuteFlipNumberView setValue:[dateComponents minute] animated:animated];
 		[self.secondFlipNumberView setValue:[dateComponents second] animated:animated];
+		
+		_startDate = [NSDate dateWithTimeIntervalSince1970:[date timeIntervalSince1970] + 0.5];
 	} else {
 		[self.dayFlipNumberView setValue:0 animated:animated];
 		[self.hourFlipNumberView setValue:0 animated:animated];
 		[self.minuteFlipNumberView setValue:0 animated:animated];
 		[self.secondFlipNumberView setValue:0 animated:animated];
 		[self stop];
+		
+		if (self.delegate && [self.delegate respondsToSelector:@selector(timerDidStop)]) {
+			[self.delegate timerDidStop];
+		}
 	}
 }
 
